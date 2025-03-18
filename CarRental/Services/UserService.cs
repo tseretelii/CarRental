@@ -32,68 +32,83 @@ namespace CarRental.Services
             var response = new ServiceResponse<bool>();
             try
             {
-                Results.Ok(response);
                 if (UserExists(dto.Email, dto.Mobile))
                 {
                     response.Success = false;
                     response.Data = false;
                     response.Message = "User Already Exists";
+                    response.StatusCode = StatusCodes.Status400BadRequest;
                 }
                 else if (dto.Password != dto.RepeatPassword)
-                    throw new BadHttpRequestException("Password doesn't match");
-
-                CreatePasswordHash(dto.Password, out byte[] passwordHash, out byte[] passwordSalt);
-
-                var user = new User()
                 {
-                    FirstName = dto.FirstName,
-                    LastName = dto.LastName,
-                    Email = dto.Email,
-                    Mobile = dto.Mobile,
-                    PasswordHash = passwordHash,
-                    PasswordSalt = passwordSalt
-                };
+                    response.Success = false;
+                    response.Data = false;
+                    response.Message = "Password doesn't Match";
+                    response.StatusCode = StatusCodes.Status400BadRequest;
+                }
+                else
+                {
+                    CreatePasswordHash(dto.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
-                await _context.Users.AddAsync(user);
-                await _context.SaveChangesAsync();
+                    var user = new User()
+                    {
+                        FirstName = dto.FirstName,
+                        LastName = dto.LastName,
+                        Email = dto.Email,
+                        Mobile = dto.Mobile,
+                        PasswordHash = passwordHash,
+                        PasswordSalt = passwordSalt
+                    };
 
-                response.Success = true;
-                response.Data = true;
-                response.Message = "User Created Successfully";
+                    await _context.Users.AddAsync(user);
+                    await _context.SaveChangesAsync();
+
+                    response.Success = true;
+                    response.Data = true;
+                    response.Message = "User Created Successfully";
+                }
+
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Data = false;
                 response.Message = ex.GetFullException();
+                response.StatusCode = StatusCodes.Status500InternalServerError;
             }
             return response;
         }
 
         public async Task<ServiceResponse<TokenDTO>> LoginAsync(UserLoginDTO dto)
         {
-            //var response = new ServiceResponse<TokenDTO>();
-            //try
-            //{
-            //    var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
+            var response = new ServiceResponse<TokenDTO>();
+            try
+            {
+                var user = await _context.Users.Include(x => x.Roles).FirstOrDefaultAsync(x => x.Email == dto.Email);
 
-            //    if (user == null)
-            //        throw new BadHttpRequestException("User not found");
+                if (user == null)
+                {
+                    response.Success = false;
+                    response.Message = "User doesn't exists";
+                    response.StatusCode = StatusCodes.Status404NotFound;
+                }
+                else if (VerifyPasswordHash(dto.Password, user.PasswordHash, user.PasswordSalt))
+                {
+                    var tokens = GenerateTokens(user, dto.StayLoggedIn);
 
-            //}
-            //catch (Exception)
-            //{
+                    response.Data = tokens;
+                }
 
-            //    throw;
-            //}
-            
-            //if (VerifyPasswordHash(dto.Password, user.PasswordSalt, user.PasswordHash))
-            //{
+            }
+            catch (Exception ex)
+            {
+                response.Success= false;
+                response.Message= ex.GetFullException();
+                response.StatusCode= StatusCodes.Status500InternalServerError;
+            }
 
-            //}
-            throw new NotImplementedException();
+            return response;
         }
-
         #region Private Methods
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
@@ -190,6 +205,10 @@ namespace CarRental.Services
             SecurityToken token = handler.CreateToken(securityTokenDescriptor);
 
             return handler.WriteToken(token);
+        }
+        private int GenerateVerificationCode()
+        {
+
         }
         #endregion
     }
