@@ -1,8 +1,13 @@
-﻿using CarRental.Interfaces;
+﻿using Azure;
+using CarRental.Interfaces;
 using CarRental.Models;
 using CarRental.Models.DTOs.Token;
 using CarRental.Models.DTOs.User;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Security.Claims;
 
 namespace CarRental.Controllers
 {
@@ -41,6 +46,37 @@ namespace CarRental.Controllers
 
             return Ok(response);
 
+        }
+        [HttpPut("VerifyAccount")]
+        public async Task<ActionResult<ServiceResponse<bool>>> VerifyAccountAsync(string telNum, string code)
+        {
+            var response = await _userService.VerifyAccountAsync(telNum, code);
+
+            if(response.StatusCode >= 400 && response.StatusCode < 500)
+                return BadRequest(response);
+            else if (response.StatusCode >= 500 && response.StatusCode < 600)
+                return StatusCode(response.StatusCode, response);
+
+            return Ok(response);
+        }
+        [HttpPatch("ResendVerificationCode")]
+        [Authorize]
+        public async Task<ActionResult<ServiceResponse<bool>>> ResendVerificationCode()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (int.TryParse(userId, out int Id))
+            {
+                var response = await _userService.ResendVerificationCode(Id);
+
+                if (response.StatusCode >= 400 && response.StatusCode < 500)
+                    return BadRequest(response);
+                else if (response.StatusCode >= 500 && response.StatusCode < 600)
+                    return StatusCode(response.StatusCode, response);
+
+                return Ok(response);
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
 }

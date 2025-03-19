@@ -9,5 +9,7 @@ namespace CarRental.Interfaces
     {
         public Task<ServiceResponse<bool>> RegisterAsync(UserRegisterDTO dto);
         public Task<ServiceResponse<TokenDTO>> LoginAsync(UserLoginDTO dto);
+        public Task<ServiceResponse<bool>> VerifyAccountAsync(string telNum, string code);
+        public Task<ServiceResponse<bool>> ResendVerificationCode(int userId);
     }
 }
