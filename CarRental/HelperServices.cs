@@ -1,5 +1,7 @@
 ﻿using System.Net.Mail;
 using System.Net;
+using CarRental.Configs;
+using System.Text.Json;
 
 namespace CarRental
 {
@@ -23,10 +25,12 @@ namespace CarRental
 
         public static void SendEmail(string userName, string userEmail, string code)
         {
-            var fromAddress = new MailAddress("emailformycsharpproject@gmail.com", "Car Rental Service");
+            var config = GetConfig();
+
+            var fromAddress = new MailAddress(config.MailAddress, "Car Rental Service");
             var toAddress = new MailAddress(userEmail, "Recipient Name");
-            const string fromPassword = "qcca kyno bwkt ukzy";
-            const string subject = "Verification Code";
+            string fromPassword = config.Password;
+            string subject = "Verification Code";
             string body = $"Dear {userName} Thank you for signing up at Car Rental Service! We’re thrilled to have you on board. " +
                 $"Your registration needs verification to complete, please visit URL and input this verification code: {code}";
 
@@ -68,6 +72,36 @@ namespace CarRental
             {
                 await writer.WriteLineAsync(ex.GetFullException());
             }
+        }
+
+        private static EmailAccountConfig GetConfig()
+        {
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "EmailConfig");
+
+            var json = Path.Combine(path, "EmailAcc.json");
+
+            if (!Directory.Exists(path))
+                throw new Exception("EmailConfig Folder missing on desktop!");
+
+            if (!File.Exists(json))
+                throw new Exception("EmailAcc.json missing in EmailConfig folder");
+
+            string txt =  "";
+
+            using(FileStream fs = new FileStream(json, FileMode.Open, FileAccess.Read))
+            {
+                using(StreamReader sr = new StreamReader(fs))
+                {
+                    txt = sr.ReadToEnd();
+                }
+            }
+
+            var config = JsonSerializer.Deserialize<EmailAccountConfig>(txt);
+
+            if (config != null)
+                return config;
+            else
+                throw new Exception("Incorrect info in EmailAcc.json");
         }
     }
 }
