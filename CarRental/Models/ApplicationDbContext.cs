@@ -8,5 +8,7 @@ namespace CarRental.Models
         public ApplicationDbContext(DbContextOptions options) : base(options) { }
         public DbSet<User> Users { get; set; }
         public DbSet<UserVerificationCode> VerificationCodes { get; set; }
+        public DbSet<Car> Cars { get; set; }
+        public DbSet<CarImages> CarImages { get; set; }
     }
 }
