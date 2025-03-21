@@ -25,6 +25,7 @@ namespace CarRental
             // Add services to the container.
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ICarService, CarService>();
+            builder.Services.AddScoped<IRentalService, RentalService>();
 
             builder.Services.AddAutoMapper(typeof(Program));
 

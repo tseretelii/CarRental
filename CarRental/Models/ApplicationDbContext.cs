@@ -10,5 +10,6 @@ namespace CarRental.Models
         public DbSet<UserVerificationCode> VerificationCodes { get; set; }
         public DbSet<Car> Cars { get; set; }
         public DbSet<CarImages> CarImages { get; set; }
+        public DbSet<Rental> Rentals { get; set; }
     }
 }

@@ -55,7 +55,38 @@ namespace CarRental
 
             Console.WriteLine("Email sent successfully!");
         }
+        public static void SendEmail(string recipiantMail, string recipiantName, string mailSubject, string mailBody)
+        {
+            var config = GetConfig();
 
+            var fromAddress = new MailAddress(config.MailAddress, "Car Rental Service");
+            var toAddress = new MailAddress(recipiantMail, recipiantName);
+            string fromPassword = config.Password;
+            string subject = mailSubject;
+            string body = mailBody;
+
+            var smtp = new SmtpClient
+            {
+                Host = "smtp.gmail.com",
+                Port = 587,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+            };
+
+            using (var message = new MailMessage(fromAddress, toAddress)
+            {
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            })
+            {
+                smtp.Send(message);
+            }
+
+            Console.WriteLine("Email sent successfully!");
+        }
         public static async void WriteExceptionToFile(Exception ex, string endpoint)
         {
             var filePath = Path.Combine(_folderPath, DateTime.Now.ToString("yyyy-MM-dd HHmmss") + " -- " + endpoint + ".txt");
