@@ -282,8 +282,14 @@ namespace CarRental.Services
             var randCode = random.Next(100000, 1000000);
 
 
-
-            HelperServices.SendEmail(user.FirstName, user.Email, randCode.ToString());
+            try
+            {
+                HelperServices.SendEmail(user.FirstName, user.Email, randCode.ToString());
+            }
+            catch (Exception ex)
+            {
+                HelperServices.WriteExceptionToFile(ex, "Email Sending At User Registration");
+            }
 
             using (var hmac = new HMACSHA512(user.PasswordSalt))
             {

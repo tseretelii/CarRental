@@ -27,10 +27,10 @@ namespace CarRental.Services
                 return response;
             }
 
-            if (dto.To < dto.From)
+            if(dto.To < dto.From)
             {
                 response.Success = false;
-                response.Message = "Incorrect duration input!";
+                response.Message = "Rental can't end before it starts!";
                 response.StatusCode = StatusCodes.Status400BadRequest;
                 return response;
             }
@@ -45,7 +45,9 @@ namespace CarRental.Services
                 return response;
             }
 
-            var car = await _context.Cars.Include(x => x.CreatedBy).FirstOrDefaultAsync(x => x.Id == dto.CarId);
+            var car = await _context.Cars
+                .Include(x => x.CreatedBy)
+                .FirstOrDefaultAsync(x => x.Id == dto.CarId);
 
             if (car == null)
             {

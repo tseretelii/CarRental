@@ -58,7 +58,7 @@ namespace CarRental.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
         [HttpPost("GetFilteredCars")]
-        public async Task<ActionResult<ServiceResponse<List<GetFilteredCarDTO>>>> GetFilteredCarsAsync(CarFilterDTO dto)
+        public async Task<ActionResult<ServiceResponse<List<GetFilteredCarDTO>>>> GetFilteredCarsAsync([FromForm] CarFilterDTO dto)
         {
             var response = await _carService.GetFilteredCarsAsync(dto);
 
