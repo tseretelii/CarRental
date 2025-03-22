@@ -26,6 +26,7 @@ namespace CarRental
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ICarService, CarService>();
             builder.Services.AddScoped<IRentalService, RentalService>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
 
             builder.Services.AddAutoMapper(typeof(Program));
 
