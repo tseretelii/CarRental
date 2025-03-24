@@ -69,10 +69,34 @@ namespace CarRental.Controllers
 
             return Ok(response);
         }
-        [HttpPost("AddRoleToUser")]
-        public async Task<ActionResult<ServiceResponse<bool>>> AddRoleToUserAsync(AddRoleToUserDTO dto)
+        [HttpPost("AddRolesToUser")]
+        public async Task<ActionResult<ServiceResponse<bool>>> AddRolesToUserAsync(AddRoleToUserDTO dto)
         {
-            var response = await _roleService.AddRoleToUserAsync(dto);
+            var response = await _roleService.AddRolesToUserAsync(dto);
+
+            if (response.StatusCode >= 400 && response.StatusCode < 500)
+                return BadRequest(response);
+            else if (response.StatusCode >= 500 && response.StatusCode < 600)
+                return StatusCode(response.StatusCode, response);
+
+            return Ok(response);
+        }
+        [HttpDelete("RemoveRolesFromUser")]
+        public async Task<ActionResult<ServiceResponse<bool>>> RemoveRolesFromUserAsync(RemoveRoleFromUserDTO dto)
+        {
+            var response = await _roleService.RemoveRolesFromUserAsync(dto);
+
+            if (response.StatusCode >= 400 && response.StatusCode < 500)
+                return BadRequest(response);
+            else if (response.StatusCode >= 500 && response.StatusCode < 600)
+                return StatusCode(response.StatusCode, response);
+
+            return Ok(response);
+        }
+        [HttpGet("GetUserRoles/{userId}")]
+        public async Task<ActionResult<ServiceResponse<List<GetRoleDTO>>>> GetUserRolesAsync(int userId)
+        {
+            var response = await _roleService.GetUserRolesAsync(userId);
 
             if (response.StatusCode >= 400 && response.StatusCode < 500)
                 return BadRequest(response);

@@ -97,7 +97,8 @@ namespace CarRental.Services
 
             await _context.SaveChangesAsync();
 
-            response.Success &= response.Data == true;
+            response.Success = true; 
+            response.Data = true;
             response.Message = "Role Updated";
             response.StatusCode = StatusCodes.Status200OK;
 
@@ -124,14 +125,15 @@ namespace CarRental.Services
 
             await _context.SaveChangesAsync();
 
-            response.Success &= response.Data == true;
+            response.Success = true;
+            response.Data = true;
             response.Message = "Role Deleted";
             response.StatusCode = StatusCodes.Status200OK;
 
             return response;
         }
 
-        public async Task<ServiceResponse<bool>> AddRoleToUserAsync(AddRoleToUserDTO dto)
+        public async Task<ServiceResponse<bool>> AddRolesToUserAsync(AddRoleToUserDTO dto)
         {
             var response = new ServiceResponse<bool>();
 
@@ -141,53 +143,145 @@ namespace CarRental.Services
 
             if (user == null)
             {
-                response.Success &= response.Data = false;
+                response.Success = false;
+                response.Data = false;
                 response.Message = "User Doesn't Exist";
-                response.StatusCode= StatusCodes.Status404NotFound;
-
-                return response;
-            }
-            if (user.Roles != null && user.Roles.Any(x => x.Id == dto.RoleId))
-            {
-                response.Success &= response.Data = false;
-                response.Message = "User Already Has This Role";
                 response.StatusCode = StatusCodes.Status404NotFound;
 
                 return response;
             }
 
-            var role = await _context.Roles
-                .FirstOrDefaultAsync(x => x.Id == dto.RoleId);
-
-            if (role == null)
+            if (dto.RoleIds.Count < 1)
             {
-                response.Success &= response.Data = false;
-                response.Message = "Role Not Found!";
-                response.StatusCode = StatusCodes.Status400BadRequest;
+                response.Success = false;
+                response.Data = false;
+                response.Message = "No Role Selected!";
+                response.StatusCode= StatusCodes.Status400BadRequest;
+
+                return response;
+            }
+
+            var rolesToAdd = await _context.Roles
+                .Where(x => dto.RoleIds.Contains(x.Id))
+                .ToListAsync();
+
+            if (rolesToAdd.Count() < 1)
+            {
+                response.Success = false; 
+                response.Data = false;
+                response.Message = "Roles Not Found!";
+                response.StatusCode= StatusCodes.Status404NotFound;
 
                 return response;
             }
 
             if (user.Roles == null)
-            {
                 user.Roles = new List<Role>();
-            }
 
-            user.Roles.Add(role);
+            user.Roles.AddRange(rolesToAdd);
 
             _context.Users.Update(user);
 
             await _context.SaveChangesAsync();
 
-            response.Success &= response.Data = true;
-            response.Message = $"Role \"{role.Name}\" Added To {user.FirstName} {user.LastName}";
+            response.Success = true;
+            response.Data = true;
+            response.Message = $"Roles \"{string.Join(", ", rolesToAdd.Select(x => x.Name))}\" added to {user.FirstName} {user.LastName}.";
+            response.StatusCode = StatusCodes.Status200OK;
+
+            return response;
+
+        }
+        public async Task<ServiceResponse<bool>> RemoveRolesFromUserAsync(RemoveRoleFromUserDTO dto)
+        {
+            var response = new ServiceResponse<bool>();
+
+            var user = await _context.Users
+                .Include(x => x.Roles)
+                .FirstOrDefaultAsync(x => x.Id == dto.UserId);
+
+            if (user == null)
+            {
+                response.Success = false;
+                response.Data = false;
+                response.Message = "User Doesn't Exist";
+                response.StatusCode = StatusCodes.Status404NotFound;
+
+                return response;
+            }
+
+            if (dto.RoleIds.Count < 1)
+            {
+                response.Success = false;
+                response.Data = false;
+                response.Message = "No Role Selected!";
+                response.StatusCode = StatusCodes.Status400BadRequest;
+
+                return response;
+            }
+
+            if(user.Roles == null || user.Roles.Count() < 1)
+            {
+                response.Success = false;
+                response.Data = false;
+                response.Message = "User has no assigned roles";
+                response.StatusCode= StatusCodes.Status400BadRequest;
+
+                return response;
+            }
+
+            user.Roles.RemoveAll(x => dto.RoleIds.Contains(x.Id));
+
+            _context.Users.Update(user);
+
+            await _context.SaveChangesAsync();
+
+            response.Success = true;
+            response.Data = true;
+            response.Message = "Specified roles removed";
             response.StatusCode = StatusCodes.Status200OK;
 
             return response;
         }
-        public async Task<ServiceResponse<bool>> RemoveRoleFromUserAsync(RemoveRoleFromUserDTO dto)
+
+        public async Task<ServiceResponse<List<GetRoleDTO>>> GetUserRolesAsync(int userId)
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<List<GetRoleDTO>>();
+
+            var user = await _context.Users
+                .Include(x => x.Roles)
+                .FirstOrDefaultAsync(x => x.Id == userId);
+
+            if (user == null)
+            {
+                response.Success = false;
+                response.Message = "User Doesn't Exist";
+                response.StatusCode = StatusCodes.Status404NotFound;
+
+                return response;
+            }
+
+            if (user.Roles == null || user.Roles.Count() < 1)
+            {
+                response.Success = false;
+                response.Message = "User has no assigned roles";
+                response.StatusCode = StatusCodes.Status400BadRequest;
+
+                return response;
+            }
+
+            response.Success = true;
+            response.Message = "User's roles";
+            response.Data = user.Roles
+                .Select(x => new GetRoleDTO
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                })
+                .ToList();
+            response.StatusCode = StatusCodes.Status200OK;
+
+            return response;
         }
     }
 }

@@ -10,7 +10,8 @@ namespace CarRental.Interfaces
         public Task<ServiceResponse<bool>> CreateRoleAsync(CreateRoleDTO dto);
         public Task<ServiceResponse<bool>> UpdateRoleAsync(UpdateRoleDTO dto);
         public Task<ServiceResponse<bool>> DeleteRoleAsync(int Id);
-        public Task<ServiceResponse<bool>> AddRoleToUserAsync(AddRoleToUserDTO dto);
-        public Task<ServiceResponse<bool>> RemoveRoleFromUserAsync(RemoveRoleFromUserDTO dto);
+        public Task<ServiceResponse<bool>> AddRolesToUserAsync(AddRoleToUserDTO dto);
+        public Task<ServiceResponse<bool>> RemoveRolesFromUserAsync(RemoveRoleFromUserDTO dto);
+        public Task<ServiceResponse<List<GetRoleDTO>>> GetUserRolesAsync(int userId);
     }
 }

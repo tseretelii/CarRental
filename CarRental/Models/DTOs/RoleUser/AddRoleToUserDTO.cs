@@ -3,6 +3,6 @@
     public class AddRoleToUserDTO
     {
         public int UserId { get; set; }
-        public int RoleId { get; set; }
+        public required List<int> RoleIds { get; set; }
     }
 }
