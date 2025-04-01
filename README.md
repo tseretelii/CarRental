@@ -172,7 +172,3 @@ Test the API using:
 Created with ❤️ by Gigi Tsereteli  
 Includes custom error logging and email verification utilities built for real-world deployment needs.
 ```
-
----
-
-Let me know if you'd like this in a downloadable `README.md` file or want me to tailor it further for deployment (e.g., Docker, CI/CD, etc.) 🚀
