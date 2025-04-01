@@ -171,4 +171,3 @@ Test the API using:
 
 Created with ❤️ by Gigi Tsereteli  
 Includes custom error logging and email verification utilities built for real-world deployment needs.
-```
