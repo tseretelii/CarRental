@@ -38,7 +38,7 @@ A modern ASP.NET Core Web API for managing car rentals. It supports user registr
 
 ```bash
 # Clone the repo
-git clone [https://github.com/your-username/car-rental-api.git](https://github.com/tseretelii/CarRental.git)
+git clone https://github.com/tseretelii/CarRental.git
 cd car-rental-api
 
 # Restore dependencies
