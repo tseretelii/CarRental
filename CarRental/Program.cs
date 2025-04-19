@@ -28,6 +28,7 @@ namespace CarRental
             builder.Services.AddScoped<IRentalService, RentalService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
+            builder.Services.AddScoped<IFavoriteCarService, FavoriteCarService>();
 
             builder.Services.AddAutoMapper(typeof(Program));
 
@@ -63,6 +64,7 @@ namespace CarRental
                 });
             });
 
+            #region comment
             //builder.Services.AddProblemDetails(options =>
             //{
             //    options.CustomizeProblemDetails = context =>
@@ -77,7 +79,8 @@ namespace CarRental
             //        context.ProblemDetails.Extensions.TryAdd("TraceId", activity?.Id);
             //    };
             //});
-
+            #endregion
+            
             var jwtOptions = builder.Configuration.GetSection("JWTOptions").Get<JWTOptionsDTO>();
 
             builder.Services.AddAuthentication(options =>
