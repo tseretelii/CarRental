@@ -19,6 +19,17 @@ namespace CarRental
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngularApp",
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:4200")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
+
             builder.Services.AddDbContext<ApplicationDbContext>(optios =>
             optios.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -112,7 +123,7 @@ namespace CarRental
                 app.UseSwaggerUI();
             }
 
-
+            app.UseCors("AllowAngularApp");
 
             app.UseHttpsRedirection();
 

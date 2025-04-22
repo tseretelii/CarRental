@@ -34,7 +34,7 @@ namespace CarRental.Services
             }
 
             var userFavoritedCars = await _context.FavoriteCars
-                .Where(x => x.User == user && x.Car != null)
+                .Where(x => x.User == user && x.Car != null && x.IsRemoved == false)
                 .ToListAsync();
 
             if (userFavoritedCars.Select(x => x.Car.Id).Contains(carId))
@@ -61,6 +61,36 @@ namespace CarRental.Services
             response.Data = true;
             response.Message = $"{favoriteCar.Car.Model} Added to favorites";
             
+            return response;
+
+        }
+
+        public async Task<ServiceResponse<bool>> RemoveCarFromFavoritesAsync(int userId, int carId)
+        {
+            var response = new ServiceResponse<bool>();
+
+            var favoriteCar = await _context.FavoriteCars.FirstOrDefaultAsync(x => x.User.Id == userId && x.Car.Id == carId && x.IsRemoved == false);
+
+            if (favoriteCar == null)
+            {
+                response.Success = false;
+                response.Data = false;
+                response.Message = "User not found";
+                response.StatusCode= StatusCodes.Status400BadRequest;
+
+                return response;
+            }
+
+            favoriteCar.IsRemoved = true;
+
+            _context.FavoriteCars.Update(favoriteCar);
+
+            await _context.SaveChangesAsync();
+
+            response.Success = true;
+            response.Data = true;
+            response.Message = "Car removed from favorites";
+
             return response;
 
         }

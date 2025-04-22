@@ -39,5 +39,24 @@ namespace CarRental.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError);
 
         }
+
+        [HttpDelete]
+        public async Task<ActionResult<ServiceResponse<bool>>> RemoveCarFromFavoritesAsync(int carId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (int.TryParse(userId, out int Id))
+            {
+                var response = await _service.RemoveCarFromFavoritesAsync(Id, carId);
+
+                if (response.StatusCode >= 400 && response.StatusCode < 500)
+                    return BadRequest(response);
+                else if (response.StatusCode >= 500 && response.StatusCode < 600)
+                    return StatusCode(response.StatusCode, response);
+
+                return Ok(response);
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
     }
 }
