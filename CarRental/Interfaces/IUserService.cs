@@ -11,5 +11,6 @@ namespace CarRental.Interfaces
         public Task<ServiceResponse<TokenDTO>> LoginAsync(UserLoginDTO dto);
         public Task<ServiceResponse<bool>> VerifyAccountAsync(string telNum, string code);
         public Task<ServiceResponse<bool>> ResendVerificationCode(int userId);
+        public Task<ServiceResponse<bool>> AddCarToFavorites(int carId, int userId);
     }
 }

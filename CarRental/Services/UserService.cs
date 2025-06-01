@@ -176,6 +176,75 @@ namespace CarRental.Services
             return response;
         }
 
+        public async Task<ServiceResponse<bool>> AddCarToFavorites(int carId, int userId)
+        {
+            var response = new ServiceResponse<bool>();
+
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+
+            if (user == null)
+            {
+                response.Success = false;
+                response.Data = false;
+                response.Message = "User not found!";
+                return response;
+            }
+
+            var car = await _context.Cars.FirstOrDefaultAsync(x => x.Id == carId);
+
+            if (car == null)
+            {
+                response.Success = false;
+                response.Data = false;
+                response.Message = "Car not found!";
+                return response;
+            }
+
+            //var favoriteCars = await _context.FavoriteCars
+            //    .Where(x => x.Users != null && x.Users
+            //        .Select(x => x.Id)
+            //        .Contains(userId))
+            //    .ToListAsync();
+
+            if (!await _context.FavoriteCars.AnyAsync(x => x.Users.Any(x => x.Id == userId)))
+            {
+
+            }
+
+            var favoriteCars = _context.FavoriteCars
+                .Where(x => x.Users != null && x.Users
+                .Select(x => x.Id)
+                .Contains(userId));
+
+            if (favoriteCars.Count() == 0)
+            {
+                var favoriteCar = new FavoriteCars() { Users = user };
+            }
+            else if (favoriteCar.Cars != null && favoriteCar.Cars.Any(x => x.Id == carId))
+            {
+                response.Success = false;
+                response.Data = false;
+                response.Message = "The car is already favored";
+                return response;
+            }
+
+            if (favoriteCar.Cars == null)
+            {
+                favoriteCar.Cars = new List<Car>();
+            }
+            
+            favoriteCar.Cars.Add(car);
+
+            await _context.SaveChangesAsync();
+
+            response.Success = true;
+            response.Data = true;
+            response.Message = $"{car.Brand} {car.Model} Added to favorites.";
+
+            return response;
+
+        }
+
         #region Private Methods
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
