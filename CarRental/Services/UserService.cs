@@ -187,6 +187,7 @@ namespace CarRental.Services
                 response.Success = false;
                 response.Data = false;
                 response.Message = "User not found!";
+                response.StatusCode = StatusCodes.Status404NotFound;
                 return response;
             }
 
@@ -197,43 +198,22 @@ namespace CarRental.Services
                 response.Success = false;
                 response.Data = false;
                 response.Message = "Car not found!";
+                response.StatusCode = StatusCodes.Status404NotFound;
                 return response;
             }
 
-            //var favoriteCars = await _context.FavoriteCars
-            //    .Where(x => x.Users != null && x.Users
-            //        .Select(x => x.Id)
-            //        .Contains(userId))
-            //    .ToListAsync();
-
-            if (!await _context.FavoriteCars.AnyAsync(x => x.Users.Any(x => x.Id == userId)))
-            {
-
-            }
-
-            var favoriteCars = _context.FavoriteCars
-                .Where(x => x.Users != null && x.Users
-                .Select(x => x.Id)
-                .Contains(userId));
-
-            if (favoriteCars.Count() == 0)
-            {
-                var favoriteCar = new FavoriteCars() { Users = user };
-            }
-            else if (favoriteCar.Cars != null && favoriteCar.Cars.Any(x => x.Id == carId))
+            if (await _context.FavoriteCars.AnyAsync(x => x.UserId == userId && x.CarId == carId))
             {
                 response.Success = false;
                 response.Data = false;
-                response.Message = "The car is already favored";
+                response.Message = $"{car.Brand} {car.Model} is already favorited";
+                response.StatusCode = StatusCodes.Status400BadRequest;
                 return response;
             }
 
-            if (favoriteCar.Cars == null)
-            {
-                favoriteCar.Cars = new List<Car>();
-            }
-            
-            favoriteCar.Cars.Add(car);
+            var favoriteCar = new FavoriteCar() { UserId = userId, CarId = carId };
+
+            await _context.FavoriteCars.AddAsync(favoriteCar);
 
             await _context.SaveChangesAsync();
 
