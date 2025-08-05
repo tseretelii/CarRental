@@ -100,7 +100,22 @@ namespace CarRental
 
             builder.Services.AddAuthorization();
 
+            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+            builder.Services.AddCors(option =>
+            {
+                option.AddPolicy(name: MyAllowSpecificOrigins,
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod();
+                    });
+            });
+
             var app = builder.Build();
+
+            app.UseRouting(); // Must be placed before UseCors
+            app.UseCors(MyAllowSpecificOrigins); // Apply the defined policy
+            app.UseAuthorization();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
